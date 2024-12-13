@@ -42,17 +42,74 @@ app.post('/submit', async (req, res) => {
   }
 });
 
-// Route to fetch messages from the database
+// Route to serve messages in a table format
 app.get('/api/messages', async (req, res) => {
   try {
+    // Fetch messages from the database
     const result = await db.execute('SELECT * FROM messages ORDER BY id DESC LIMIT 50');
-    res.json(result.rows); // Return the rows from the database
+
+    // Generate the HTML table
+    let htmlTable = `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Messages</title>
+          <style>
+              table {
+                  width: 100%;
+                  border-collapse: collapse;
+              }
+              table, th, td {
+                  border: 1px solid black;
+              }
+              th, td {
+                  padding: 8px;
+                  text-align: left;
+              }
+          </style>
+      </head>
+      <body>
+          <h1>Messages from Database</h1>
+          <table>
+              <thead>
+                  <tr>
+                      <th>Name</th>
+                      <th>Message</th>
+                      <th>Date</th>
+                  </tr>
+              </thead>
+              <tbody>
+    `;
+
+    // Loop through the messages and add each one as a row in the table
+    result.rows.forEach(message => {
+      htmlTable += `
+        <tr>
+          <td>${message.name}</td>
+          <td>${message.message}</td>
+          <td>${new Date(message.timestamp).toLocaleString()}</td> <!-- Assuming you have a timestamp column -->
+        </tr>
+      `;
+    });
+
+    // Close the table and HTML tags
+    htmlTable += `
+              </tbody>
+          </table>
+      </body>
+      </html>
+    `;
+
+    // Send the generated HTML as a response
+    res.send(htmlTable);
+
   } catch (err) {
     console.error('Database error:', err.message);
-    res.status(500).json({ error: 'Failed to fetch messages' });
+    res.status(500).send('Failed to fetch messages');
   }
 });
-
 
 // Start server
 app.listen(PORT, () => {
