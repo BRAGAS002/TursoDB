@@ -41,6 +41,19 @@ app.post('/submit', async (req, res) => {
     res.status(500).json({ status: 'error', message: 'Failed to save message' });
   }
 });
+
+// Route to fetch messages from the database
+app.get('/api/messages', async (req, res) => {
+  try {
+    const result = await db.execute('SELECT * FROM messages ORDER BY id DESC LIMIT 50');
+    res.json(result.rows); // Return the rows from the database
+  } catch (err) {
+    console.error('Database error:', err.message);
+    res.status(500).json({ error: 'Failed to fetch messages' });
+  }
+});
+
+
 // Start server
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
