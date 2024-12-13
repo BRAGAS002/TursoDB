@@ -31,13 +31,16 @@ app.post('/submit', async (req, res) => {
       `INSERT INTO messages (name, message) VALUES (?, ?)`,
       [name, message]
     );
-    res.json({ status: 'success', message: 'Message saved!', result });
+    res.status(200).json({ 
+      status: 'success', 
+      message: 'Your message has been sent successfully!', 
+      result 
+    });
   } catch (err) {
     console.error('Database error:', err.message);
     res.status(500).json({ status: 'error', message: 'Failed to save message' });
   }
 });
-
 // Start server
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
