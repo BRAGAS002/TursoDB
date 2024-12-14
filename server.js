@@ -6,23 +6,19 @@ const cors = require('cors');
 const app = express();
 const PORT = 3000;
 
-// Middleware
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-// Connect to Turso database
 const db = createClient({
   url: 'libsql://server-bragas002.aws-us-east-1.turso.io',
   authToken: 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3MzQwNzg3MjAsImlkIjoiNmEyMTZkNTUtZWUzOC00YWQ3LTk0MjctYzZmYTU2OWJmZmE2In0.0oaEDs3D1vcEbsEJ93C7Om3aWHMdpA_yMRq4I7aF_M8JHxktEoJwnWE4UdMXSQkDrC6nYvO57lEfL5guKXHxBQ', // Replace with your Turso auth token
 });
 
-// Route to serve HTML
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
 });
 
-// Route to save form data
 app.post('/submit', async (req, res) => {
   const { name, message } = req.body;
 
@@ -42,13 +38,10 @@ app.post('/submit', async (req, res) => {
   }
 });
 
-// Route to serve messages in a table format
 app.get('/api/messages', async (req, res) => {
   try {
-    // Fetch messages from the database
     const result = await db.execute('SELECT * FROM messages ORDER BY id DESC LIMIT 50');
 
-    // Generate the HTML table
     let htmlTable = `
       <!DOCTYPE html>
       <html lang="en">
@@ -83,7 +76,6 @@ app.get('/api/messages', async (req, res) => {
               <tbody>
     `;
 
-    // Loop through the messages and add each one as a row in the table
     result.rows.forEach(message => {
       htmlTable += `
         <tr>
@@ -94,7 +86,6 @@ app.get('/api/messages', async (req, res) => {
       `;
     });
 
-    // Close the table and HTML tags
     htmlTable += `
               </tbody>
           </table>
@@ -102,7 +93,6 @@ app.get('/api/messages', async (req, res) => {
       </html>
     `;
 
-    // Send the generated HTML as a response
     res.send(htmlTable);
 
   } catch (err) {
@@ -111,7 +101,6 @@ app.get('/api/messages', async (req, res) => {
   }
 });
 
-// Start server
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
 });
